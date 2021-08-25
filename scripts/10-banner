@@ -1,0 +1,12 @@
+#! /bin/bash
+
+# Hostname banner for MOTD
+
+color="\e[30;1;125m"
+reset="\e[0m"
+
+if [ -n $(which figlet) ]; then
+	printf "${color}"
+	figlet -w 70 -f larry3d "$(hostname)"
+	printf "${reset}"
+fi

@@ -1,0 +1,15 @@
+#!/bin/bash
+
+B="\e[0;34m"
+W="\e[39m"
+O="\e[0;33m"
+
+printf "${B}Interface Information:${W}\n"
+
+ifaces=($(ip -o link show | awk -F': ' '{print $2}' | grep -v "lo"))
+
+for i in "${ifaces[@]}"
+do
+     state=$(ip -s -c link show "$i" | head -1 | awk '{for(i=1;i<=NF;i++) if ($i=="state") print $(i+1)}')
+     printf "  ${O}%-8s : ${W}%s\n" "$i" "$state"
+done

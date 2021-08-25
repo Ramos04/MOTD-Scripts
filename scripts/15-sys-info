@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# get load averages
+IFS=" " read LOAD1 LOAD5 LOAD15 <<<$(cat /proc/loadavg | awk '{ print $1,$2,$3 }')
+# get free memory
+IFS=" " read USED AVAIL TOTAL <<<$(free -htm | grep "Mem" | awk {'print $3,$7,$2'})
+# get processes
+PROCESS=`ps -eo user=|sort|uniq -c | awk '{ print $2 " " $1 }'`
+PROCESS_ALL=`echo "$PROCESS"| awk {'print $2'} | awk '{ SUM += $1} END { print SUM }'`
+PROCESS_ROOT=`echo "$PROCESS"| grep root | awk {'print $2'}`
+PROCESS_USER=`echo "$PROCESS"| grep -v root | awk {'print $2'} | awk '{ SUM += $1} END { print SUM }'`
+# get processors
+PROCESSOR_NAME=`grep "model name" /proc/cpuinfo | cut -d ' ' -f3- | awk {'print $0'} | head -1`
+PROCESSOR_COUNT=`grep -ioP 'processor\t:' /proc/cpuinfo | wc -l`
+IP_ADDR=($(hostname -I | sed '/\n/!s/[0-9.]\+/\n&\n/;/^\([0-9]\{1,3\}\.\)\{3\}[0-9]\{1,3\}\n/P;D'))
+
+W="\e[0;39m"
+G="\e[1;32m"
+O="\e[0;33m"
+B="\e[0;34m"
+
+
+host=$(hostname)
+distro=$(cat /etc/*release | grep "PRETTY_NAME" | cut -d "=" -f 2- | sed 's/"//g')
+kern=$(uname -sr)
+arch=$(arch)
+uptime=$(uptime -p)
+
+printf "${B}System Information:${W}\n"
+B="\e[0;34m"
+
+printf "  ${O}%-10s${W} : ${W}%s\n" "Hostname" "$host"
+printf "  ${O}%-10s${W} : ${W}%s\n" "Distro" "$distro"
+printf "  ${O}%-10s${W} : ${W}%s\n" "Arch" "$arch"
+for ip in "${IP_ADDR[@]}"; do
+     printf "  ${O}%-10s${W} : ${W}%s\n" "Address" "$ip"
+done
+printf "  ${O}%-10s${W} : ${W}%s (${G}%s ${W}vCPU)\n" "Processor" "$PROCESSOR_NAME" "$PROCESSOR_COUNT"
+printf "  ${O}%-10s${W} : ${W}%s\n" "Uptime" "$uptime"
+printf "  ${O}%-10s${W} : ${G}%s ${W}(1m) ${G}%s ${W}(5m) ${G}%s ${W}(15m)\n" "Load" "$LOAD1" "$LOAD5" "$LOAD15"
+printf "  ${O}%-10s${W} : ${G}%s ${W}(root) ${G}%s ${W}(user) ${G}%s ${W}(total)\n" "Processes" "$PROCESS_ROOT" "$PROCESS_USER" "$PROCESS_ALL"
+printf "  ${O}%-10s${W} : ${G}%s ${W}(used) ${G}%s ${W}(avail) ${G}%s ${W}(total)\n" "Memory" "$USED" "$AVAIL" "$TOTAL"
+
+printf "\n"

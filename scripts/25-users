@@ -1,0 +1,10 @@
+#!/bin/bash
+
+blue="\e[0;34m"
+white="\e[39m"
+
+printf "${blue}Disk usage:${white}\n"
+
+w | tail -n +2
+
+printf "\n"

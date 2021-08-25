@@ -1,0 +1,58 @@
+#!/bin/bash
+
+# Colors
+RESET_COLORS='\033[0m'
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+ORANGE='\033[0;33m'
+blue="\e[0;34m"
+white="\e[39m"
+
+# Need to edit the services array with your specfic services you want to monitor
+
+# For openvpn install via this script https://github.com/angristan/openvpn-install
+# added the services below to the array
+#   - "openvpn-server@server.service" 
+#   - "openvpn-iptables" 
+
+# Common Services
+#   - "apache2"
+#   - "nginx"
+#   - "plexmediaserver"
+#   - "smbd" 
+#   - "Splunkd.service"
+#   - "sshd" 
+#   - "ufw" 
+#   - "xrdp"
+
+services=("sshd" "ufw")
+
+# sort services
+IFS=$'\n' services=($(sort <<<"${services[*]}"))
+unset IFS
+
+service_status=()
+
+
+printf "${blue}+--------- SERVICE ------------+-- STATUS --+---------- UPTIME ---------- ${white}\n"
+
+out=""
+
+# get status of all services
+for service in "${services[@]}"; do
+
+     status=$(systemctl is-active "$service")
+     uptime=$(systemctl show "$service" --property=ActiveEnterTimestamp | cut -d"=" -f2)
+     service=$(echo ${service} | sed -e 's/\.service//g' | sed -e 's/@server//g')
+
+     if [[ $status == "inactive" ]]; then
+          #printf "${ORANGE}%-35s ${RESET_COLORS}: ${RED}%-10s${RESET_COLORS}\n" "$service" "$status"
+          printf "${ORANGE}%-30s ${RESET_COLORS}| ${RED}%-10s ${RESET_COLORS}| %s\n" "$service" "$status" "$uptime"
+          #printf " └─ %s\n" "$uptime"
+     else
+          printf "${ORANGE}%-30s ${RESET_COLORS}| ${GREEN}%-10s ${RESET_COLORS}| %s\n" "$service" "$status" "$uptime"
+          #printf " └─ %s\n" "$uptime"
+     fi
+done
+
+printf "\n"
