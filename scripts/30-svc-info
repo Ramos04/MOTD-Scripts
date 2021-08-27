@@ -25,7 +25,7 @@ white="\e[39m"
 #   - "ufw" 
 #   - "xrdp"
 
-services=("Splunkd.service" "sshd" "ufw")
+services=("lighttpd" "splunk" "sshd")
 
 # sort services
 IFS=$'\n' services=($(sort <<<"${services[*]}"))
