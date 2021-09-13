@@ -46,13 +46,18 @@ for service in "${services[@]}"; do
      service=$(echo ${service} | sed -e 's/\.service//g' | sed -e 's/@server//g')
 
      if [[ $status == "inactive" ]]; then
-          #printf "${ORANGE}%-35s ${RESET_COLORS}: ${RED}%-10s${RESET_COLORS}\n" "$service" "$status"
           printf "${ORANGE}%-30s ${RESET_COLORS}| ${RED}%-10s ${RESET_COLORS}| %s\n" "$service" "$status" "$uptime"
-          #printf " └─ %s\n" "$uptime"
      else
           printf "${ORANGE}%-30s ${RESET_COLORS}| ${GREEN}%-10s ${RESET_COLORS}| %s\n" "$service" "$status" "$uptime"
-          #printf " └─ %s\n" "$uptime"
      fi
 done
+
+ufw_status=$(ufw status | grep Status | cut -d' ' -f2)
+
+if [[ $ufw_status == "inactive" ]]; then
+       	printf "${ORANGE}%-30s ${RESET_COLORS}| ${RED}%-10s ${RESET_COLORS}| %s\n" "ufw" "$ufw_status"
+else
+	printf "${ORANGE}%-30s ${RESET_COLORS}| ${GREEN}%-10s ${RESET_COLORS}| %s\n" "ufw" "$ufw_status"
+fi
 
 printf "\n"
